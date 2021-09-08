@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -11,9 +11,63 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
+import LandingScreen from "./components/auth/Landing";
+import RegisterScreen from "./components/auth/Register";
+import LoginScreen from "./components/auth/Login";
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/database";
+import "firebase/firestore";
+import "firebase/functions";
+import "firebase/storage";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const firebaseConfig = {
+  apiKey: "AIzaSyCi7A2O0Lm4bm9EwwI3RGa_8rc2zQEEKvs",
+  authDomain: "test-app-38056.firebaseapp.com",
+  projectId: "test-app-38056",
+  storageBucket: "test-app-38056.appspot.com",
+  messagingSenderId: "178104326190",
+  appId: "1:178104326190:web:10fd8b18d2a9b96902a7bf",
+};
+if (firebase.apps.length === 0) {
+  firebase.initializeApp(firebaseConfig);
+}
+
 export default function App({ navigation }) {
+  const [loaded, setLoaded] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  useEffect(() =>
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        setLoggedIn(false), setLoaded(true);
+      } else {
+        setLoggedIn(true), setLoaded(true);
+      }
+    })
+  );
+  if (!loaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <Text>Loading</Text>
+      </View>
+    );
+  }
+  if (!loggedIn) {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Landing">
+          <Stack.Screen
+            name="Landing"
+            component={LandingScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
   return (
     <NavigationContainer>
       <Tab.Navigator
